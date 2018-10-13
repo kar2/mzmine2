@@ -19,12 +19,14 @@
 package net.sf.mzmine.main;
 
 import net.sf.mzmine.modules.batchmode.BatchModeModule;
+import net.sf.mzmine.modules.ftp.FTPModule;
 import net.sf.mzmine.modules.masslistmethods.ADAPchromatogrambuilder.ADAPChromatogramBuilderModule;
 import net.sf.mzmine.modules.masslistmethods.chromatogrambuilder.ChromatogramBuilderModule;
 import net.sf.mzmine.modules.masslistmethods.shoulderpeaksfilter.ShoulderPeaksFilterModule;
 import net.sf.mzmine.modules.peaklistmethods.alignment.hierarchical.HierarAlignerGcModule;
 import net.sf.mzmine.modules.peaklistmethods.alignment.join.JoinAlignerModule;
 import net.sf.mzmine.modules.peaklistmethods.alignment.ransac.RansacAlignerModule;
+import net.sf.mzmine.modules.peaklistmethods.basiclearner.LearnerModule;
 import net.sf.mzmine.modules.peaklistmethods.dataanalysis.clustering.ClusteringModule;
 import net.sf.mzmine.modules.peaklistmethods.dataanalysis.heatmaps.HeatMapModule;
 import net.sf.mzmine.modules.peaklistmethods.dataanalysis.projectionplots.CDAPlotModule;
@@ -190,7 +192,10 @@ public class MZmineModulesList {
       VanKrevelenDiagramModule.class,
 
       // Tools
-      MzRangeMassCalculatorModule.class, MzRangeFormulaCalculatorModule.class, IsotopePatternPreviewModule.class
+      MzRangeMassCalculatorModule.class, MzRangeFormulaCalculatorModule.class, IsotopePatternPreviewModule.class,
+
+      // FTP
+      FTPModule.class
 
   };
 }

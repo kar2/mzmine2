@@ -40,7 +40,8 @@ public enum MZmineModuleCategory {
   VISUALIZATIONPEAKLIST("Visualization peak list"), //
   DATAANALYSIS("Data analysis"), //
   HELPSYSTEM("Help"), //
-  TOOLS("Tools"); //
+  TOOLS("Tools"),
+  FTP("Upload using FTP"); //
 
   private final String name;
 
