@@ -7,6 +7,12 @@ import net.sf.mzmine.parameters.ParameterSet;
 import net.sf.mzmine.taskcontrol.Task;
 import net.sf.mzmine.util.ExitCode;
 
+import java.io.IOException;
+
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPClientConfig;
+import org.apache.commons.net.ftp.FTPReply;
+
 import javax.annotation.Nonnull;
 import java.util.Collection;
 
@@ -21,6 +27,7 @@ public class FTPModule implements MZmineProcessingModule {
         @Nonnull Collection<Task> tasks) {
 
         System.out.println("This is just a test.");
+        connectViaFTP();
         return ExitCode.OK;
 
     }
@@ -46,5 +53,46 @@ public class FTPModule implements MZmineProcessingModule {
     @Override
     public @Nonnull String getDescription() {
         return MODULE_DESCRIPTION;
+    }
+
+    public void connectViaFTP() {
+        FTPClient ftp = new FTPClient();
+        FTPClientConfig config = new FTPClientConfig();
+        //ftp.configure(config);
+        boolean error = false;
+        String loginID = FTPParameters.loginID.getValue();
+        String password = FTPParameters.password.getValue(); // TODO: Add try block to see if this is null
+        // TODO: Log in with login id and pass for FTP
+        try {
+            int reply;
+            String server = "ftp.example.com"; // Testing url
+            ftp.connect(server);
+            //ftp.login();
+            System.out.println("Connected to " + server + ".");
+            System.out.print(ftp.getReplyString());
+
+            // After connection attempt, you should check the reply code to verify
+            // success.
+            reply = ftp.getReplyCode();
+
+            if(!FTPReply.isPositiveCompletion(reply)) {
+                ftp.disconnect();
+                System.err.println("FTP server refused connection.");
+                System.exit(1);
+            }
+            ftp.logout();
+        } catch(IOException e) {
+            error = true;
+            e.printStackTrace();
+        } finally {
+            if(ftp.isConnected()) {
+                try {
+                    ftp.disconnect();
+                } catch(IOException ioe) {
+                    // do nothing
+                }
+            }
+            System.exit(error ? 1 : 0);
+        }
     }
 }

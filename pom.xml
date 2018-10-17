@@ -669,7 +669,13 @@
 			<version>${threetenbp-version}</version>
 		</dependency>
 		<!-- End of swagger dependencies -->
-
+		<!-- FTP dependency -->
+		<dependency>
+			<groupId>commons-net</groupId>
+			<artifactId>commons-net</artifactId>
+			<version>3.6</version>
+		</dependency>
+        <!-- End of FTP dependency -->
 	</dependencies>
 
 </project>
