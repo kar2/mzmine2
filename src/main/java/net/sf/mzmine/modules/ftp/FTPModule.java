@@ -7,6 +7,9 @@ import net.sf.mzmine.parameters.ParameterSet;
 import net.sf.mzmine.taskcontrol.Task;
 import net.sf.mzmine.util.ExitCode;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.apache.commons.net.ftp.FTPClient;
@@ -20,14 +23,30 @@ public class FTPModule implements MZmineProcessingModule {
 
     private static final String MODULE_NAME = "Upload via FTP";
     private static final String MODULE_DESCRIPTION = "This module is for FTP upload to GNPS";
+    private static final String FTP_URL = "massive.ucsd.edu"; // MassIVE ftp url
+    private static final int FTP_PORT = 21;
 
+    String loginID = FTPParameters.loginID.getValue();
+    String password = FTPParameters.password.getValue();
+    File file = FTPParameters.filename.getValue();
+
+    // TODO: Option to select peak list and analyze then upload
+    // TODO: Upload form disk
     @Override
     @Nonnull
     public ExitCode runModule(@Nonnull MZmineProject project, @Nonnull ParameterSet parameters,
         @Nonnull Collection<Task> tasks) {
 
-        System.out.println("This is just a test.");
-        connectViaFTP();
+        String loginID = FTPParameters.loginID.getValue();
+        String password = FTPParameters.password.getValue();
+        File file = FTPParameters.filename.getValue();
+
+        try {
+            connectViaFTP(loginID, password, file);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            // TODO: Error handling
+        }
         return ExitCode.OK;
 
     }
@@ -55,20 +74,18 @@ public class FTPModule implements MZmineProcessingModule {
         return MODULE_DESCRIPTION;
     }
 
-    public void connectViaFTP() {
+    public void connectViaFTP(String loginID, String password, File file) throws FileNotFoundException {
         FTPClient ftp = new FTPClient();
         FTPClientConfig config = new FTPClientConfig();
         //ftp.configure(config);
         boolean error = false;
-        String loginID = FTPParameters.loginID.getValue();
-        String password = FTPParameters.password.getValue(); // TODO: Add try block to see if this is null
-        // TODO: Log in with login id and pass for FTP
+
+        FileInputStream fis = new FileInputStream(file);
+
         try {
             int reply;
-            String server = "ftp.example.com"; // Testing url
-            ftp.connect(server);
-            //ftp.login();
-            System.out.println("Connected to " + server + ".");
+            ftp.connect(FTP_URL, FTP_PORT);
+            System.out.println("Connected to " + FTP_URL + ".");
             System.out.print(ftp.getReplyString());
 
             // After connection attempt, you should check the reply code to verify
@@ -79,6 +96,14 @@ public class FTPModule implements MZmineProcessingModule {
                 ftp.disconnect();
                 System.err.println("FTP server refused connection.");
                 System.exit(1);
+            } else {
+                if (ftp.login(loginID, password)) {
+                    System.out.println("Successfully logged in to " + FTP_URL + ".");
+                }
+                System.out.println("Filename: " + file.getName());
+                if (ftp.storeFile(file.getName(), fis)) {
+                    System.out.println("Successfully uploaded file to GNPS.");
+                }
             }
             ftp.logout();
         } catch(IOException e) {
@@ -92,7 +117,9 @@ public class FTPModule implements MZmineProcessingModule {
                     // do nothing
                 }
             }
-            System.exit(error ? 1 : 0);
+            if (error) {
+                System.exit(1);
+            }
         }
     }
 }
