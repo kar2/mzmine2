@@ -41,7 +41,7 @@ public class GNPSExportTask extends AbstractTask {
 
   private final String massListName;
 
-  GNPSExportTask(ParameterSet parameters) {
+  public GNPSExportTask(ParameterSet parameters) {
     this.peakLists =
         parameters.getParameter(GNPSExportParameters.PEAK_LISTS).getValue().getMatchingPeakLists();
 
