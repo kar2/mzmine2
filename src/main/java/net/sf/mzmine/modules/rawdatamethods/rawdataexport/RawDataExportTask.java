@@ -42,7 +42,7 @@ public class RawDataExportTask extends AbstractTask {
 
   /**
    * @param dataFile
-   * @param parameters
+   * @param outFilename
    */
   public RawDataExportTask(RawDataFile dataFile, File outFilename) {
     this.dataFile = dataFile;
