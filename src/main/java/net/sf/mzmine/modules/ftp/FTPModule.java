@@ -1,11 +1,8 @@
 package net.sf.mzmine.modules.ftp;
 
-import io.github.msdk.MSDKException;
-import io.github.msdk.io.mzml.MzMLFileExportMethod;
-import io.github.msdk.io.mzml.data.MzMLCompressionType;
 import net.sf.mzmine.datamodel.MZmineProject;
 import net.sf.mzmine.datamodel.RawDataFile;
-import net.sf.mzmine.datamodel.impl.MZmineToMSDKRawDataFile;
+import net.sf.mzmine.main.MZmineCore;
 import net.sf.mzmine.modules.MZmineModuleCategory;
 import net.sf.mzmine.modules.MZmineProcessingModule;
 import net.sf.mzmine.parameters.ParameterSet;
@@ -23,6 +20,8 @@ import org.apache.commons.net.ftp.FTPReply;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class FTPModule implements MZmineProcessingModule {
 
@@ -33,37 +32,24 @@ public class FTPModule implements MZmineProcessingModule {
     private static final String FTP_URL = "massive.ucsd.edu"; // MassIVE ftp url
     private static final int FTP_PORT = 21;
 
+    private static Logger logger = Logger.getLogger(FTPModule.class.getName());
+
     @Override
     @Nonnull
     public ExitCode runModule(@Nonnull MZmineProject project, @Nonnull ParameterSet parameters,
         @Nonnull Collection<Task> tasks) {
 
-        // TODO: Distinguish between select all or if some raw data files are selected
         String loginId = FTPParameters.LOGIN_ID.getValue();
-        String password = FTPParameters.PASSWORD.getValue();
+        String password = FTPParameters.PASSWORD.getValue(); // TODO: Make private
 
-        RawDataFile[] dataFileArray = FTPParameters.DATAFILES.getValue().getMatchingRawDataFiles();
-        for (int i = 0; i < dataFileArray.length; i++) {
-            if (dataFileArray[i] != null) {
-                try {
-                    File tempFile = null;
-                    try {
-                        tempFile = File.createTempFile(dataFileArray[i].getName().substring(0,
-                                dataFileArray[i].getName().indexOf(".")), ".mzML");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    if (tempFile != null) {
-                        tempFile = convertRawDataToFile(dataFileArray[i], tempFile);
-                        try {
-                            connectViaFTP(loginId, password, tempFile);
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                } catch (MSDKException e) {
-                    e.printStackTrace();
-                }
+        // Select all data files
+        RawDataFile[] dataFileArray = MZmineCore.getProjectManager().getCurrentProject().getDataFiles();
+
+        for (int i  = 0; i < dataFileArray.length; i++) {
+            try {
+                connectViaFTP(loginId, password, dataFileArray[i].getPathToFile());
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
             }
         }
         return ExitCode.OK;
@@ -109,8 +95,7 @@ public class FTPModule implements MZmineProcessingModule {
         try {
             int reply;
             ftp.connect(FTP_URL, FTP_PORT);
-            System.out.println("Connected to " + FTP_URL + ".");
-            System.out.print(ftp.getReplyString());
+            logger.info("Connected to " + FTP_URL + ".");
 
             // After connection attempt, you should check the reply code to verify
             // success.
@@ -118,15 +103,14 @@ public class FTPModule implements MZmineProcessingModule {
 
             if(!FTPReply.isPositiveCompletion(reply)) {
                 ftp.disconnect();
-                System.err.println("FTP server refused connection.");
-                System.exit(1);
+                logger.log(Level.SEVERE,"FTP server refused connection.");
             } else {
                 if (ftp.login(loginID, password)) {
-                    System.out.println("Successfully logged in to " + FTP_URL + ".");
+                    logger.info("Successfully logged in to " + FTP_URL + ".");
                 }
-                System.out.println("Filename: " + file.getName());
+                logger.finest("Filename: " + file.getName());
                 if (ftp.storeFile(file.getName(), fis)) {
-                    System.out.println("Successfully uploaded file to GNPS. \n");
+                    logger.info("Successfully uploaded file to GNPS. \n");
                 }
             }
             ftp.logout();
@@ -145,16 +129,5 @@ public class FTPModule implements MZmineProcessingModule {
                 System.exit(1);
             }
         }
-    }
-
-    public File convertRawDataToFile(RawDataFile dataFile, File file) throws MSDKException {
-        MzMLFileExportMethod msdkMethod;
-        if (file.getName().toLowerCase().endsWith("mzml")) {
-             msdkMethod = new MzMLFileExportMethod(new MZmineToMSDKRawDataFile(dataFile), file,
-                    MzMLCompressionType.ZLIB,
-                    MzMLCompressionType.ZLIB);
-             //msdkMethod.execute();
-        }
-        return file;
     }
 }

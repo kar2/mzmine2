@@ -61,6 +61,7 @@ public class RawDataFileImpl implements RawDataFile, RawDataFileWriter {
 
   // Name of this raw data file - may be changed by the user
   private String dataFileName;
+  private File pathToRawDataFile; // File for upload to GNPS
 
   private final Hashtable<Integer, Range<Double>> dataMZRange, dataRTRange;
   private final Hashtable<Integer, Double> dataMaxBasePeakIntensity, dataMaxTIC;
@@ -82,6 +83,23 @@ public class RawDataFileImpl implements RawDataFile, RawDataFileWriter {
   public RawDataFileImpl(String dataFileName) throws IOException {
 
     this.dataFileName = dataFileName;
+
+    // Prepare the hashtables for scan numbers and data limits.
+    scanNumbersCache = new Hashtable<Integer, int[]>();
+    dataMZRange = new Hashtable<Integer, Range<Double>>();
+    dataRTRange = new Hashtable<Integer, Range<Double>>();
+    dataMaxBasePeakIntensity = new Hashtable<Integer, Double>();
+    dataMaxTIC = new Hashtable<Integer, Double>();
+    scans = new Hashtable<Integer, StorableScan>();
+    dataPointsOffsets = new TreeMap<Integer, Long>();
+    dataPointsLengths = new TreeMap<Integer, Integer>();
+
+  }
+
+  public RawDataFileImpl(String dataFileName, File pathToRawDataFile) throws IOException {
+
+    this.dataFileName = dataFileName;
+    this.pathToRawDataFile = pathToRawDataFile;
 
     // Prepare the hashtables for scan numbers and data limits.
     scanNumbersCache = new Hashtable<Integer, int[]>();
@@ -530,5 +548,7 @@ public class RawDataFileImpl implements RawDataFile, RawDataFileWriter {
   public String toString() {
     return dataFileName;
   }
+
+  public File getPathToFile() { return this.pathToRawDataFile; }
 
 }

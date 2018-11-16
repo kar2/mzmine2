@@ -22,6 +22,8 @@ import javax.annotation.Nonnull;
 
 import com.google.common.collect.Range;
 
+import java.io.File;
+
 public interface RawDataFile {
 
 
@@ -105,5 +107,7 @@ public interface RawDataFile {
    * Close the file in case it is removed from the project
    */
   public void close();
+
+  public File getPathToFile();
 
 }

@@ -75,7 +75,7 @@ public class RawDataImportModule implements MZmineProcessingModule {
   public ExitCode runModule(final @Nonnull MZmineProject project, @Nonnull ParameterSet parameters,
       @Nonnull Collection<Task> tasks) {
 
-    File fileNames[] = parameters.getParameter(RawDataImportParameters.fileNames).getValue();
+    File fileNames[] = parameters.getParameter(RawDataImportParameters.fileNames).getValue(); // Files inputted
 
     // Find common prefix in raw file names if in GUI mode
     String commonPrefix = null;
@@ -145,7 +145,7 @@ public class RawDataImportModule implements MZmineProcessingModule {
 
       RawDataFileWriter newMZmineFile;
       try {
-        newMZmineFile = MZmineCore.createNewFile(newName);
+        newMZmineFile = MZmineCore.createNewFile(newName, fileNames[i]);
       } catch (IOException e) {
         MZmineCore.getDesktop().displayErrorMessage(MZmineCore.getDesktop().getMainWindow(),
             "Could not create a new temporary file " + e);

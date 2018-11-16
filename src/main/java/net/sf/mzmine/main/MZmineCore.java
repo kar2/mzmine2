@@ -283,6 +283,9 @@ public final class MZmineCore {
   public static RawDataFileWriter createNewFile(String name) throws IOException {
     return new RawDataFileImpl(name);
   }
+  public static RawDataFileWriter createNewFile(String name, File path) throws IOException {
+    return new RawDataFileImpl(name, path);
+  }
 
   @Nonnull
   public static String getMZmineVersion() {
